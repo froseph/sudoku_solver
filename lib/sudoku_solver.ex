@@ -22,11 +22,7 @@ defmodule SudokuSolver do
   end
 
   defp solve_recursive_helper(%SudokuBoard{} = board, -1) do
-    if SudokuBoard.solved?(board) do
-      b
-    else
-      nil
-    end
+    if SudokuBoard.solved?(board), do: board, else: nil
   end
   defp solve_recursive_helper(%SudokuBoard{size: size, grid: grid} = board, idx) do
     elt = Enum.at(grid, idx)
@@ -37,9 +33,7 @@ defmodule SudokuSolver do
     end
   end
 
-  defp try_solve_recursive(%SudokuBoard{}, idx, []) do
-    nil
-  end
+  defp try_solve_recursive(%SudokuBoard{}, idx, []), do: nil
   defp try_solve_recursive(%SudokuBoard{grid: grid} = board, idx, [number | others]) do
     new_board = SudokuBoard.place_number(board, idx, number)
     if SudokuBoard.partial_solution?(new_board) do

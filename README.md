@@ -1,6 +1,6 @@
 # SudokuSolver
 
-Solevs sudokus
+Solves sudokus
 
 ## Installation
 
