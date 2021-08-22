@@ -30,7 +30,7 @@ defmodule SudokuBoard do
   def read_file(path) do
     case File.read(path) do
       {:ok, data} -> parse(data)
-      {:error, reason} -> {:error, "File error:" <> reason}
+      {:error, reason} -> {:error, "File error: " <> Atom.to_string(reason)}
     end
   end
 
@@ -59,20 +59,24 @@ defmodule SudokuBoard do
   """
   @spec parse(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
   def parse(str) do
-    grid = str
-      |> String.split(",")
-      |> Enum.map( fn elt -> elt |> String.trim |> Integer.parse |> elem(0) end)
+    try do
+      grid = str
+        |> String.split(",")
+        |> Enum.map( fn elt -> elt |> String.trim |> Integer.parse |> elem(0) end)
 
-    size = grid
-      |> Enum.count
-      |> :math.sqrt
-      |> trunc
+      size = grid
+        |> Enum.count
+        |> :math.sqrt
+        |> trunc
 
-    board = %SudokuBoard{size: size, grid: grid}
-    if valid?(board) do
-      {:ok, board}
-    else
-      {:error, "Invalid board"}
+      board = %SudokuBoard{size: size, grid: grid}
+      if valid?(board) do
+        {:ok, board}
+      else
+        {:error, "Invalid board"}
+      end
+    rescue
+      _ -> {:error, "Parsing error"}
     end
   end
 
