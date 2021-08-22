@@ -34,6 +34,14 @@ defmodule SudokuBoard do
     end
   end
 
+  @spec new(list(integer)) :: SudokuBoard.t
+  def new(grid) do
+    size = grid
+      |> Enum.count
+      |> integer_sqrt
+    %SudokuBoard{grid: grid, size: size}
+  end
+
   @doc """
   Parses a string representation of a sudoku board.
 
@@ -101,6 +109,32 @@ defmodule SudokuBoard do
     %SudokuBoard{size: size, grid: new_grid}
   end
 
+  @doc """
+  Tests if the board is solved
+
+  ## Parameters
+
+    - board: A Sudokuboard.t representing a board
+
+  ## Examples
+
+
+    iex> SudokuBoard.new([1,2,3,4,
+      3,4,1,2,
+      4,1,2,3,
+      2,3,4,1]) |> SudokuBoard.solved?
+    true
+  """
+  @spec solved?(SudokuBoard.t) :: boolean
+  def solved?(%SudokuBoard{} = board) do
+    valid?(board) and filled?(board) and partial_solution?(board)
+  end
+
+  # true if all squares in the board are populated
+  defp filled?(%SudokuBoard{grid: grid}) do
+    Enum.all?(grid, fn x -> x != 0 end)
+  end
+
   @spec unique_list?(list(integer)) :: boolean
   defp unique_list?(l) do
     filled_values = Enum.filter(l, fn x -> x > 0 end)
@@ -116,6 +150,7 @@ defmodule SudokuBoard do
   @spec integer_sqrt(Integer) :: Integer
   defp integer_sqrt(i), do: trunc(:math.sqrt(i))
 
+  # TODO not needed since partial and completeness test covers everything
   @spec valid_section?(list(integer), integer) :: boolean
   defp valid_section?(section, size), do: Enum.sort(section) == Enum.to_list(1..size)
 
