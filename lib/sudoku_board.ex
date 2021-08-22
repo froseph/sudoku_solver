@@ -3,7 +3,7 @@ defmodule SudokuBoard do
   Implements a Sudoku board
   """
   defstruct size: 9, grid: List.duplicate(0, 81)
-  @type t :: %SudokuBoard{}
+  @type t :: %SudokuBoard{size: integer, grid: list(integer)}
 
   @doc """
   Checks if a sudoku board is well formed.
@@ -29,7 +29,7 @@ defmodule SudokuBoard do
   @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
   def read_file(path) do
     case File.read(path) do
-      {:ok, data} -> parse_board(data)
+      {:ok, data} -> parse(data)
       {:error, reason} -> {:error, "File error:" <> reason}
     end
   end
@@ -46,19 +46,19 @@ defmodule SudokuBoard do
 
   ## Examples
 
-    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,0")
+    iex> SudokuBoard.parse("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,0")
     {:ok,
      %SudokuBoard{grid: [0, 0, 1, 2, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0], size: 4}}
 
-    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,9")
+    iex> SudokuBoard.parse("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,9")
     {:error, "Invalid board"}
 
-    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0")
+    iex> SudokuBoard.parse("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0")
     {:error, "Invalid board"}
 
   """
-  @spec parse_board(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
-  def parse_board(str) do
+  @spec parse(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
+  def parse(str) do
     grid = str
       |> String.split(",")
       |> Enum.map( fn elt -> elt |> String.trim |> Integer.parse |> elem(0) end)
