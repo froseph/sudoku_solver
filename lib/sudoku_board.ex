@@ -80,12 +80,25 @@ defmodule SudokuBoard do
   end
 
   # assumes a valid sudoku board
+  @doc """
+  Validates if a board is a partial solution
+
+  ## Parameters
+
+    - board: A sudoku board
+  """
   @spec partial_solution?(SudokuBoard.t) :: boolean
-  def partial_solution?(%SudokuBoard{size: size, grid: grid} = board) do
+  def partial_solution?(%SudokuBoard{} = board) do
     rows = get_rows(board)
     cols = get_columns(board)
     boxes = get_boxes(board)
     Enum.all?(rows, &unique_list?/1) and Enum.all?(cols, &unique_list?/1) and Enum.all?(boxes, &unique_list?/1)
+  end
+
+  @spec place_number(SudokuBoard.t, integer, integer) :: SudokuBoard.t
+  def place_number(%SudokuBoard{size: size, grid: grid}, idx, number) do
+    new_grid = List.replace_at(grid, idx, number)
+    %SudokuBoard{size: size, grid: new_grid}
   end
 
   @spec unique_list?(list(integer)) :: boolean
