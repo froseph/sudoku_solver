@@ -16,7 +16,11 @@ defmodule SudokuSolver do
     :world
   end
 
-  def solve_recusive(%SudokuBoard{size: size} = board) do
+  @doc """
+  Implements a sudoku solver using recursion
+  """
+  @spec solve_recursive(SudokuBoard.t) :: SudokuBoard.t | nil
+  def solve_recursive(%SudokuBoard{size: size} = board) do
     max_index = size * size - 1
     solve_recursive_helper(board, max_index)
   end
@@ -48,6 +52,10 @@ defmodule SudokuSolver do
     end
   end
 
+  @doc """
+  Implements a sudoku solver using continuation passing style
+  """
+  @spec solve_cps(SudokuBoard.t) :: SudokuBoard.t | nil
   def solve_cps(%SudokuBoard{size: size} = board) do
     max_index = size * size - 1
     solve_cps_helper(board, max_index, fn () -> nil end)
