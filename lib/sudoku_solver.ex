@@ -33,8 +33,8 @@ defmodule SudokuSolver do
     end
   end
 
-  defp try_solve_recursive(%SudokuBoard{}, idx, []), do: nil
-  defp try_solve_recursive(%SudokuBoard{grid: grid} = board, idx, [number | others]) do
+  defp try_solve_recursive(%SudokuBoard{}, _idx, []), do: nil
+  defp try_solve_recursive(%SudokuBoard{} = board, idx, [number | others]) do
     new_board = SudokuBoard.place_number(board, idx, number)
     if SudokuBoard.partial_solution?(new_board) do
       solution = solve_recursive_helper(new_board, idx + 1)
