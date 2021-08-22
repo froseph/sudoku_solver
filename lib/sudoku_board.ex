@@ -29,14 +29,7 @@ defmodule SudokuBoard do
   @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
   def read_file(path) do
     case File.read(path) do
-      {:ok, data} ->
-        board = parse_board(data)
-
-        if valid?(board) do
-          {:ok, board}
-        else
-          {:error, "Invalid board"}
-        end
+      {:ok, data} -> parse_board(data)
       {:error, reason} -> {:error, "File error:" <> reason}
     end
   end
@@ -46,8 +39,25 @@ defmodule SudokuBoard do
 
   Each board is a CSV containing digits 0-n where `n` x `n` is the size of the board.
   Zeros represent empty spaces.
+
+  ## Parameters
+
+    - board_string: A string representing a board
+
+  ## Examples
+
+    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,0")
+    {:ok,
+     %SudokuBoard{grid: [0, 0, 1, 2, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0], size: 4}}
+
+    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,9")
+    {:error, "Invalid board"}
+
+    iex> SudokuBoard.parse_board("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0")
+    {:error, "Invalid board"}
+
   """
-  @spec parse_board(String.t) :: SudokuBoard.t
+  @spec parse_board(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
   def parse_board(str) do
     grid = str
       |> String.split(",")
@@ -58,7 +68,12 @@ defmodule SudokuBoard do
       |> :math.sqrt
       |> trunc
 
-    %SudokuBoard{size: size, grid: grid}
+    board = %SudokuBoard{size: size, grid: grid}
+    if valid?(board) do
+      {:ok, board}
+    else
+      {:error, "Invalid board"}
+    end
   end
 
   @spec square?(Integer) :: boolean
