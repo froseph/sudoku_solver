@@ -5,35 +5,6 @@ defmodule SudokuBoard do
   defstruct size: 9, grid: List.duplicate(0, 81)
   @type t :: %SudokuBoard{size: integer, grid: list(integer)}
 
-  @doc """
-  Checks if a sudoku board is well formed.
-
-  ## Parameters
-
-    - board: A SudokuBoard.t representing a board
-  """
-  @spec valid?(SudokuBoard.t) :: boolean
-  def valid?(%SudokuBoard{size: size, grid: grid}) do
-    square?(size) and
-      Enum.count(grid) == size * size and
-      Enum.all?(grid, fn element -> 0 <= element and element <= size end)
-  end
-
-  @doc """
-  Reads a sudoku board from a file
-
-  ## Parameters
-
-    - file_path: string representing the file path of the file to be loaded
-  """
-  @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
-  def read_file(path) do
-    case File.read(path) do
-      {:ok, data} -> parse(data)
-      {:error, reason} -> {:error, "File error: " <> Atom.to_string(reason)}
-    end
-  end
-
   @spec new(list(integer)) :: SudokuBoard.t
   def new(grid) do
     size = grid
@@ -103,6 +74,21 @@ defmodule SudokuBoard do
     Enum.all?(rows, &unique_list?/1) and Enum.all?(cols, &unique_list?/1) and Enum.all?(boxes, &unique_list?/1)
   end
 
+  @doc """
+  Reads a sudoku board from a file
+
+  ## Parameters
+
+    - file_path: string representing the file path of the file to be loaded
+  """
+  @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
+  def read_file(path) do
+    case File.read(path) do
+      {:ok, data} -> parse(data)
+      {:error, reason} -> {:error, "File error: " <> Atom.to_string(reason)}
+    end
+  end
+
   @spec place_number(SudokuBoard.t, integer, integer) :: SudokuBoard.t
   def place_number(%SudokuBoard{size: size, grid: grid}, idx, number) do
     new_grid = List.replace_at(grid, idx, number)
@@ -129,6 +115,22 @@ defmodule SudokuBoard do
   def solved?(%SudokuBoard{} = board) do
     valid?(board) and filled?(board) and partial_solution?(board)
   end
+
+  @doc """
+  Checks if a sudoku board is well formed.
+
+  ## Parameters
+
+    - board: A SudokuBoard.t representing a board
+  """
+  @spec valid?(SudokuBoard.t) :: boolean
+  def valid?(%SudokuBoard{size: size, grid: grid}) do
+    square?(size) and
+      Enum.count(grid) == size * size and
+      Enum.all?(grid, fn element -> 0 <= element and element <= size end)
+  end
+
+  ## Private methods
 
   # true if all squares in the board are populated
   defp filled?(%SudokuBoard{grid: grid}) do
@@ -169,7 +171,7 @@ defmodule SudokuBoard do
   end
 
   @spec get_boxes(Sudokuboard.t) :: list(list(integer))
-  def get_boxes(%SudokuBoard{size: size, grid: grid}) do
+  defp get_boxes(%SudokuBoard{size: size, grid: grid}) do
     grid
       |> Enum.with_index
       |> Enum.sort(fn ({_, idx_1}, {_, idx_2}) -> get_box_index(idx_1, size) <= get_box_index(idx_2, size) end)
@@ -177,15 +179,15 @@ defmodule SudokuBoard do
       |> Enum.chunk_every(size)
   end
 
-  def get_row_index(idx, sudoku_size) do
+  defp get_row_index(idx, sudoku_size) do
     div(idx, sudoku_size)
   end
 
-  def get_col_index(idx, sudoku_size) do
+  defp get_col_index(idx, sudoku_size) do
     rem(idx, sudoku_size)
   end
 
-  def get_box_index(idx, sudoku_size) do
+  defp get_box_index(idx, sudoku_size) do
     box_size = integer_sqrt(sudoku_size)
     row = get_row_index(idx, sudoku_size)
     col = get_col_index(idx, sudoku_size)
