@@ -48,7 +48,32 @@ defmodule SudokuSolver do
     end
   end
 
-  def solve_cps do
-    nil
+  def solve_cps(%SudokuBoard{size: size} = board) do
+    max_index = size * size - 1
+    solve_cps_helper(board, max_index, fn () -> nil end)
   end
+
+  def solve_cps_helper(%SudokuBoard{} = board, -1, fc) do
+    if SudokuBoard.solved?(board), do: board, else: fc.()
+  end
+
+  def solve_cps_helper(%SudokuBoard{size: size, grid: grid} = board, idx, fc) do
+    elt = Enum.at(grid, idx)
+    if elt != 0 do
+      solve_cps_helper(board, idx-1, fc)
+    else
+      try_solve_cps(board, idx, Enum.to_list(1..size), fc)
+    end
+  end
+
+  defp try_solve_cps(%SudokuBoard{}, _idx, [], fc), do: fc.()
+  defp try_solve_cps(%SudokuBoard{} = board, idx, [number | others], fc) do
+    new_board = SudokuBoard.place_number(board, idx, number)
+    if SudokuBoard.partial_solution?(new_board) do
+      solve_cps_helper(new_board, idx + 1, fn -> try_solve_cps(board, idx, others, fc) end)
+    else
+      try_solve_cps(board, idx, others, fc)
+    end
+  end
+
 end
