@@ -1,7 +1,17 @@
 defmodule SudokuBoard do
+  @moduledoc """
+  Implements a Sudoku board
+  """
   defstruct size: 9, grid: List.duplicate(0, 81)
   @type t :: %SudokuBoard{}
 
+  @doc """
+  Checks if a sudoku board is well formed.
+
+  ## Parameters
+
+    - board: A SudokuBoard.t representing a board
+  """
   @spec valid?(SudokuBoard.t) :: boolean
   def valid?(%SudokuBoard{size: size, grid: grid}) do
     square?(size) and
@@ -9,8 +19,15 @@ defmodule SudokuBoard do
       Enum.all?(grid, fn element -> 0 <= element and element <= size end)
   end
 
-  @spec load_sudoku(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
-  def load_sudoku(path) do
+  @doc """
+  Reads a sudoku board from a file
+
+  ## Parameters
+
+    - file_path: string representing the file path of the file to be loaded
+  """
+  @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
+  def read_file(path) do
     case File.read(path) do
       {:ok, data} ->
         board = parse_board(data)
@@ -24,8 +41,14 @@ defmodule SudokuBoard do
     end
   end
 
+  @doc """
+  Parses a string representation of a sudoku board.
+
+  Each board is a CSV containing digits 0-n where `n` x `n` is the size of the board.
+  Zeros represent empty spaces.
+  """
   @spec parse_board(String.t) :: SudokuBoard.t
-  defp parse_board(str) do
+  def parse_board(str) do
     grid = str
       |> String.split(",")
       |> Enum.map( fn elt -> elt |> String.trim |> Integer.parse |> elem(0) end)
