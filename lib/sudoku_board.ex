@@ -66,8 +66,7 @@ defmodule SudokuBoard do
 
       size = grid
         |> Enum.count
-        |> :math.sqrt
-        |> trunc
+        |> integer_sqrt
 
       board = %SudokuBoard{size: size, grid: grid}
       if valid?(board) do
@@ -80,11 +79,71 @@ defmodule SudokuBoard do
     end
   end
 
+  # assumes a valid sudoku board
+  @spec partial_solution?(SudokuBoard.t) :: boolean
+  def partial_solution?(%SudokuBoard{size: size, grid: grid} = board) do
+    rows = get_rows(board)
+    cols = get_columns(board)
+    boxes = get_boxes(board)
+    Enum.all?(rows, &unique_list?/1) and Enum.all?(cols, &unique_list?/1) and Enum.all?(boxes, &unique_list?/1)
+  end
+
+  @spec unique_list?(list(integer)) :: boolean
+  defp unique_list?(l) do
+    filled_values = Enum.filter(l, fn x -> x > 0 end)
+    Enum.count(filled_values) == MapSet.new(filled_values) |> Enum.count
+  end
+
   @spec square?(Integer) :: boolean
   defp square?(i) do
-    j = trunc(:math.sqrt(i))
+    j = integer_sqrt(i)
     j * j == i
   end
+
+  @spec integer_sqrt(Integer) :: Integer
+  defp integer_sqrt(i), do: trunc(:math.sqrt(i))
+
+  @spec valid_section?(list(integer), integer) :: boolean
+  defp valid_section?(section, size), do: Enum.sort(section) == Enum.to_list(1..size)
+
+  @spec get_rows(SudokuBoard.t) :: list(list(integer))
+  defp get_rows(%SudokuBoard{size: size, grid: grid}) do
+    Enum.chunk_every(grid, size)
+  end
+
+  @spec get_columns(SudokuBoard.t) :: list(list(integer))
+  defp get_columns(%SudokuBoard{size: size, grid: grid}) do
+    grid
+      |> Enum.with_index
+      |> Enum.sort(fn ({_, idx_1}, {_, idx_2}) -> get_col_index(idx_1, size) <= get_col_index(idx_2, size) end)
+      |> Enum.map(&(elem(&1, 0)))
+      |> Enum.chunk_every(size)
+  end
+
+  @spec get_boxes(Sudokuboard.t) :: list(list(integer))
+  def get_boxes(%SudokuBoard{size: size, grid: grid}) do
+    grid
+      |> Enum.with_index
+      |> Enum.sort(fn ({_, idx_1}, {_, idx_2}) -> get_box_index(idx_1, size) <= get_box_index(idx_2, size) end)
+      |> Enum.map(&(elem(&1, 0)))
+      |> Enum.chunk_every(size)
+  end
+
+  def get_row_index(idx, sudoku_size) do
+    div(idx, sudoku_size)
+  end
+
+  def get_col_index(idx, sudoku_size) do
+    rem(idx, sudoku_size)
+  end
+
+  def get_box_index(idx, sudoku_size) do
+    box_size = integer_sqrt(sudoku_size)
+    row = get_row_index(idx, sudoku_size)
+    col = get_col_index(idx, sudoku_size)
+    div(row, box_size) * box_size + div(col, box_size)
+  end
+
 end
 
 defimpl String.Chars, for: SudokuBoard do
