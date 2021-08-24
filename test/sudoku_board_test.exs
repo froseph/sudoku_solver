@@ -3,7 +3,7 @@ defmodule SudokuBoardTest do
   doctest SudokuBoard
 
   test "create a sudoku board" do
-    grid = [0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,0]
+    grid = [0, 0, 1, 2, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0]
     board = SudokuBoard.new(grid)
     assert board.size == 4
     assert board.grid == grid
@@ -47,7 +47,7 @@ defmodule SudokuBoardTest do
 
   test "test read file" do
     input = SudokuBoard.read_file("./test/valid_4x4.txt")
-    expected = SudokuBoard.new([1,2,3,4,3,4,1,2,4,1,2,3,2,3,4,1])
+    expected = SudokuBoard.new([1, 2, 3, 4, 3, 4, 1, 2, 4, 1, 2, 3, 2, 3, 4, 1])
     assert input == {:ok, expected}
   end
 
@@ -63,12 +63,12 @@ defmodule SudokuBoardTest do
 
   test "test place_number" do
     input_board = SudokuBoard.new([0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 1, 0, 0])
-    expected_board= SudokuBoard.new([0, 3, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 1, 0, 0])
+    expected_board = SudokuBoard.new([0, 3, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 1, 0, 0])
     assert expected_board == SudokuBoard.place_number(input_board, 1, 3)
   end
 
   test "test validating a solved board" do
-    solved = SudokuBoard.new([1,2,3,4,3,4,1,2,4,1,2,3,2,3,4,1])
+    solved = SudokuBoard.new([1, 2, 3, 4, 3, 4, 1, 2, 4, 1, 2, 3, 2, 3, 4, 1])
     assert true == SudokuBoard.solved?(solved)
   end
 

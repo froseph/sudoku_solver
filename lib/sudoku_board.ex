@@ -5,9 +5,9 @@ defmodule SudokuBoard do
   defstruct size: 9, grid: List.duplicate(0, 81)
   @type t :: %SudokuBoard{size: integer, grid: list(integer)}
 
-  @spec equals?(SudokuBoard.t, SudokuBoard.t) :: boolean
+  @spec equals?(SudokuBoard.t(), SudokuBoard.t()) :: boolean
   def equals?(board1, board2) do
-    board1.size== board2.size and board1.grid == board2.grid
+    board1.size == board2.size and board1.grid == board2.grid
   end
 
   @doc """
@@ -17,11 +17,13 @@ defmodule SudokuBoard do
 
     - grid: A integer list representing a board. Element 0 is at top left, n is at bottom right.
   """
-  @spec new(list(integer)) :: SudokuBoard.t
+  @spec new(list(integer)) :: SudokuBoard.t()
   def new(grid) do
-    size = grid
-      |> Enum.count
+    size =
+      grid
+      |> Enum.count()
       |> integer_sqrt
+
     %SudokuBoard{grid: grid, size: size}
   end
 
@@ -45,18 +47,21 @@ defmodule SudokuBoard do
     {:error, "Invalid board"}
 
   """
-  @spec parse(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
+  @spec parse(String.t()) :: {:ok, SudokuBoard.t()} | {:error, String.t()}
   def parse(str) do
     try do
-      grid = str
+      grid =
+        str
         |> String.split(",")
-        |> Enum.map( fn elt -> elt |> String.trim |> Integer.parse |> elem(0) end)
+        |> Enum.map(fn elt -> elt |> String.trim() |> Integer.parse() |> elem(0) end)
 
-      size = grid
-        |> Enum.count
+      size =
+        grid
+        |> Enum.count()
         |> integer_sqrt
 
       board = %SudokuBoard{size: size, grid: grid}
+
       if valid?(board) do
         {:ok, board}
       else
@@ -75,12 +80,14 @@ defmodule SudokuBoard do
 
     - board: A sudoku board
   """
-  @spec partial_solution?(SudokuBoard.t) :: boolean
+  @spec partial_solution?(SudokuBoard.t()) :: boolean
   def partial_solution?(%SudokuBoard{} = board) do
     rows = get_rows(board)
     cols = get_columns(board)
     boxes = get_boxes(board)
-    Enum.all?(rows, &unique_list?/1) and Enum.all?(cols, &unique_list?/1) and Enum.all?(boxes, &unique_list?/1)
+
+    Enum.all?(rows, &unique_list?/1) and Enum.all?(cols, &unique_list?/1) and
+      Enum.all?(boxes, &unique_list?/1)
   end
 
   @doc """
@@ -90,7 +97,7 @@ defmodule SudokuBoard do
 
     - file_path: string representing the file path of the file to be loaded
   """
-  @spec read_file(String.t) :: {:ok, SudokuBoard.t} | {:error, String.t}
+  @spec read_file(String.t()) :: {:ok, SudokuBoard.t()} | {:error, String.t()}
   def read_file(path) do
     case File.read(path) do
       {:ok, data} -> parse(data)
@@ -107,7 +114,7 @@ defmodule SudokuBoard do
     - index: An index into the board
     - number: The number to be placed into the board
   """
-  @spec place_number(SudokuBoard.t, integer, integer) :: SudokuBoard.t
+  @spec place_number(SudokuBoard.t(), integer, integer) :: SudokuBoard.t()
   def place_number(%SudokuBoard{size: size, grid: grid}, idx, number) do
     new_grid = List.replace_at(grid, idx, number)
     %SudokuBoard{size: size, grid: new_grid}
@@ -130,7 +137,7 @@ defmodule SudokuBoard do
     true
 
   """
-  @spec solved?(SudokuBoard.t) :: boolean
+  @spec solved?(SudokuBoard.t()) :: boolean
   def solved?(%SudokuBoard{} = board) do
     valid?(board) and filled?(board) and partial_solution?(board)
   end
@@ -142,7 +149,7 @@ defmodule SudokuBoard do
 
     - board: A SudokuBoard.t representing a board
   """
-  @spec valid?(SudokuBoard.t) :: boolean
+  @spec valid?(SudokuBoard.t()) :: boolean
   def valid?(%SudokuBoard{size: size, grid: grid}) do
     square?(size) and
       Enum.count(grid) == size * size and
@@ -159,7 +166,7 @@ defmodule SudokuBoard do
   @spec unique_list?(list(integer)) :: boolean
   defp unique_list?(l) do
     filled_values = Enum.filter(l, fn x -> x > 0 end)
-    Enum.count(filled_values) == MapSet.new(filled_values) |> Enum.count
+    Enum.count(filled_values) == MapSet.new(filled_values) |> Enum.count()
   end
 
   @spec square?(Integer) :: boolean
@@ -175,27 +182,31 @@ defmodule SudokuBoard do
   @spec valid_section?(list(integer), integer) :: boolean
   defp valid_section?(section, size), do: Enum.sort(section) == Enum.to_list(1..size)
 
-  @spec get_rows(SudokuBoard.t) :: list(list(integer))
+  @spec get_rows(SudokuBoard.t()) :: list(list(integer))
   defp get_rows(%SudokuBoard{size: size, grid: grid}) do
     Enum.chunk_every(grid, size)
   end
 
-  @spec get_columns(SudokuBoard.t) :: list(list(integer))
+  @spec get_columns(SudokuBoard.t()) :: list(list(integer))
   defp get_columns(%SudokuBoard{size: size, grid: grid}) do
     grid
-      |> Enum.with_index
-      |> Enum.sort(fn ({_, idx_1}, {_, idx_2}) -> get_col_index(idx_1, size) <= get_col_index(idx_2, size) end)
-      |> Enum.map(&(elem(&1, 0)))
-      |> Enum.chunk_every(size)
+    |> Enum.with_index()
+    |> Enum.sort(fn {_, idx_1}, {_, idx_2} ->
+      get_col_index(idx_1, size) <= get_col_index(idx_2, size)
+    end)
+    |> Enum.map(&elem(&1, 0))
+    |> Enum.chunk_every(size)
   end
 
-  @spec get_boxes(Sudokuboard.t) :: list(list(integer))
+  @spec get_boxes(Sudokuboard.t()) :: list(list(integer))
   defp get_boxes(%SudokuBoard{size: size, grid: grid}) do
     grid
-      |> Enum.with_index
-      |> Enum.sort(fn ({_, idx_1}, {_, idx_2}) -> get_box_index(idx_1, size) <= get_box_index(idx_2, size) end)
-      |> Enum.map(&(elem(&1, 0)))
-      |> Enum.chunk_every(size)
+    |> Enum.with_index()
+    |> Enum.sort(fn {_, idx_1}, {_, idx_2} ->
+      get_box_index(idx_1, size) <= get_box_index(idx_2, size)
+    end)
+    |> Enum.map(&elem(&1, 0))
+    |> Enum.chunk_every(size)
   end
 
   defp get_row_index(idx, sudoku_size) do
@@ -212,28 +223,31 @@ defmodule SudokuBoard do
     col = get_col_index(idx, sudoku_size)
     div(row, box_size) * box_size + div(col, box_size)
   end
-
 end
 
 defimpl String.Chars, for: SudokuBoard do
   def to_string(%SudokuBoard{size: size, grid: grid}) do
-
-    chunk_size = size
-      |> :math.sqrt
+    chunk_size =
+      size
+      |> :math.sqrt()
       |> trunc
 
-    board_string = grid
+    board_string =
+      grid
       |> Enum.map(fn elem -> "#{elem}," end)
       |> Enum.chunk_every(size)
-      |> Enum.with_index
+      |> Enum.with_index()
       |> Enum.reduce("", fn {row, idx}, acc ->
-        extra_rows = if rem(idx, chunk_size) == 0 do
-          "\n"
-        else
-          ""
-        end
-        "#{acc}#{extra_rows}\n\t    #{format_row(row, chunk_size)}" end)
-      |> String.trim
+        extra_rows =
+          if rem(idx, chunk_size) == 0 do
+            "\n"
+          else
+            ""
+          end
+
+        "#{acc}#{extra_rows}\n\t    #{format_row(row, chunk_size)}"
+      end)
+      |> String.trim()
 
     ~s/%SudokuBoard{
       size: #{size},
@@ -243,8 +257,8 @@ defimpl String.Chars, for: SudokuBoard do
 
   defp format_row(row, chunk_size) do
     row
-      |> Enum.chunk_every(chunk_size)
-      |> Enum.reduce("", fn x, acc -> "#{acc}  #{x}" end)
-      |> String.trim
+    |> Enum.chunk_every(chunk_size)
+    |> Enum.reduce("", fn x, acc -> "#{acc}  #{x}" end)
+    |> String.trim()
   end
 end

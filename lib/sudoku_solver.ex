@@ -6,7 +6,7 @@ defmodule SudokuSolver do
   @doc """
   Implements a sudoku solver using recursion
   """
-  @spec solve_recursive(SudokuBoard.t) :: SudokuBoard.t | nil
+  @spec solve_recursive(SudokuBoard.t()) :: SudokuBoard.t() | nil
   def solve_recursive(%SudokuBoard{size: size} = board) do
     max_index = size * size - 1
     solve_recursive_helper(board, max_index)
@@ -16,8 +16,10 @@ defmodule SudokuSolver do
   defp solve_recursive_helper(%SudokuBoard{} = board, -1) do
     if SudokuBoard.solved?(board), do: board, else: nil
   end
+
   defp solve_recursive_helper(%SudokuBoard{size: size, grid: grid} = board, idx) do
     elt = Enum.at(grid, idx)
+
     if elt != 0 do
       solve_recursive_helper(board, idx - 1)
     else
@@ -26,10 +28,13 @@ defmodule SudokuSolver do
   end
 
   defp try_solve_recursive(%SudokuBoard{}, _idx, []), do: nil
+
   defp try_solve_recursive(%SudokuBoard{} = board, idx, [number | others]) do
     new_board = SudokuBoard.place_number(board, idx, number)
+
     if SudokuBoard.partial_solution?(new_board) do
       solution = solve_recursive_helper(new_board, idx - 1)
+
       if solution == nil do
         try_solve_recursive(board, idx, others)
       else
@@ -43,10 +48,10 @@ defmodule SudokuSolver do
   @doc """
   Implements a sudoku solver using continuation passing style
   """
-  @spec solve_cps(SudokuBoard.t) :: SudokuBoard.t | nil
+  @spec solve_cps(SudokuBoard.t()) :: SudokuBoard.t() | nil
   def solve_cps(%SudokuBoard{size: size} = board) do
     max_index = size * size - 1
-    solve_cps_helper(board, max_index, fn () -> nil end)
+    solve_cps_helper(board, max_index, fn -> nil end)
   end
 
   # Solves sudoku by starting at the end and moving to the start.
@@ -56,6 +61,7 @@ defmodule SudokuSolver do
 
   def solve_cps_helper(%SudokuBoard{size: size, grid: grid} = board, idx, fc) do
     elt = Enum.at(grid, idx)
+
     if elt != 0 do
       solve_cps_helper(board, idx - 1, fc)
     else
@@ -64,13 +70,14 @@ defmodule SudokuSolver do
   end
 
   defp try_solve_cps(%SudokuBoard{}, _idx, [], fc), do: fc.()
+
   defp try_solve_cps(%SudokuBoard{} = board, idx, [number | others], fc) do
     new_board = SudokuBoard.place_number(board, idx, number)
+
     if SudokuBoard.partial_solution?(new_board) do
       solve_cps_helper(new_board, idx - 1, fn -> try_solve_cps(board, idx, others, fc) end)
     else
       try_solve_cps(board, idx, others, fc)
     end
   end
-
 end
