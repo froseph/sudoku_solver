@@ -4,19 +4,6 @@ defmodule SudokuSolver do
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> SudokuSolver.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
-
-  @doc """
   Implements a sudoku solver using recursion
   """
   @spec solve_recursive(SudokuBoard.t) :: SudokuBoard.t | nil
