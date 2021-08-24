@@ -10,6 +10,13 @@ defmodule SudokuBoard do
     board1.size== board2.size and board1.grid == board2.grid
   end
 
+  @doc """
+  Creates a sudokuboard from a list. No validation checking is done.
+
+  ## Parameters
+
+    - grid: A integer list representing a board. Element 0 is at top left, n is at bottom right.
+  """
   @spec new(list(integer)) :: SudokuBoard.t
   def new(grid) do
     size = grid
@@ -34,10 +41,7 @@ defmodule SudokuBoard do
     {:ok,
      %SudokuBoard{grid: [0, 0, 1, 2, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 0], size: 4}}
 
-    iex> SudokuBoard.parse("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0,9")
-    {:error, "Invalid board"}
-
-    iex> SudokuBoard.parse("0,0,1,2,0,0,0,0,1,2,3,4,0,0,0")
+    iex> SudokuBoard.parse("0,0,1")
     {:error, "Invalid board"}
 
   """
@@ -94,6 +98,15 @@ defmodule SudokuBoard do
     end
   end
 
+  @doc """
+  Place a number into the sudoku board. Does not ensure that the square is empty.
+
+  ## Parameters
+
+    - board: A sudoku board
+    - index: An index into the board
+    - number: The number to be placed into the board
+  """
   @spec place_number(SudokuBoard.t, integer, integer) :: SudokuBoard.t
   def place_number(%SudokuBoard{size: size, grid: grid}, idx, number) do
     new_grid = List.replace_at(grid, idx, number)
