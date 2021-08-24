@@ -5,6 +5,11 @@ defmodule SudokuBoard do
   defstruct size: 9, grid: List.duplicate(0, 81)
   @type t :: %SudokuBoard{size: integer, grid: list(integer)}
 
+  @spec equals?(SudokuBoard.t, SudokuBoard.t) :: boolean
+  def equals?(board1, board2) do
+    board1.size== board2.size and board1.grid == board2.grid
+  end
+
   @spec new(list(integer)) :: SudokuBoard.t
   def new(grid) do
     size = grid
@@ -106,10 +111,11 @@ defmodule SudokuBoard do
 
 
     iex> SudokuBoard.new([1,2,3,4,
-      3,4,1,2,
-      4,1,2,3,
-      2,3,4,1]) |> SudokuBoard.solved?
+    ...> 3,4,1,2,
+    ...> 4,1,2,3,
+    ...> 2,3,4,1]) |> SudokuBoard.solved?
     true
+
   """
   @spec solved?(SudokuBoard.t) :: boolean
   def solved?(%SudokuBoard{} = board) do
