@@ -169,18 +169,14 @@ defmodule SudokuBoard do
     Enum.count(filled_values) == MapSet.new(filled_values) |> Enum.count()
   end
 
-  @spec square?(Integer) :: boolean
+  @spec square?(integer) :: boolean
   defp square?(i) do
     j = integer_sqrt(i)
     j * j == i
   end
 
-  @spec integer_sqrt(Integer) :: Integer
+  @spec integer_sqrt(integer) :: integer
   defp integer_sqrt(i), do: trunc(:math.sqrt(i))
-
-  # TODO not needed since partial and completeness test covers everything
-  @spec valid_section?(list(integer), integer) :: boolean
-  defp valid_section?(section, size), do: Enum.sort(section) == Enum.to_list(1..size)
 
   @spec get_rows(SudokuBoard.t()) :: list(list(integer))
   defp get_rows(%SudokuBoard{size: size, grid: grid}) do
@@ -198,7 +194,7 @@ defmodule SudokuBoard do
     |> Enum.chunk_every(size)
   end
 
-  @spec get_boxes(Sudokuboard.t()) :: list(list(integer))
+  @spec get_boxes(SudokuBoard.t()) :: list(list(integer))
   defp get_boxes(%SudokuBoard{size: size, grid: grid}) do
     grid
     |> Enum.with_index()
