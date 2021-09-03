@@ -222,7 +222,7 @@ defmodule SudokuBoard do
 end
 
 defimpl String.Chars, for: SudokuBoard do
-  @spec to_string(SudokuBoard.t()) :: string
+  @spec to_string(SudokuBoard.t()) :: binary()
   def to_string(%SudokuBoard{size: size, grid: grid}) do
     chunk_size =
       size
