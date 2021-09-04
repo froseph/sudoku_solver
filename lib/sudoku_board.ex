@@ -3,7 +3,7 @@ defmodule SudokuBoard do
   Implements a Sudoku board
   """
   defstruct size: 9, grid: List.duplicate(0, 81)
-  @type t :: %SudokuBoard{size: integer, grid: list(integer)}
+  @type t :: %SudokuBoard{size: non_neg_integer(), grid: list(non_neg_integer())}
 
   @spec equals?(SudokuBoard.t(), SudokuBoard.t()) :: boolean
   def equals?(board1, board2) do
@@ -17,7 +17,7 @@ defmodule SudokuBoard do
 
     - grid: A integer list representing a board. Element 0 is at top left, n is at bottom right.
   """
-  @spec new(list(integer)) :: SudokuBoard.t()
+  @spec new(list(non_neg_integer)) :: SudokuBoard.t()
   def new(grid) do
     size =
       grid
@@ -114,8 +114,9 @@ defmodule SudokuBoard do
     - index: An index into the board
     - number: The number to be placed into the board
   """
-  @spec place_number(SudokuBoard.t(), integer, integer) :: SudokuBoard.t()
-  def place_number(%SudokuBoard{size: size, grid: grid}, idx, number) do
+  @spec place_number(SudokuBoard.t(), non_neg_integer(), non_neg_integer()) :: SudokuBoard.t()
+  def place_number(%SudokuBoard{size: size, grid: grid}, idx, number)
+      when 1 <= number and number <= size do
     new_grid = List.replace_at(grid, idx, number)
     %SudokuBoard{size: size, grid: new_grid}
   end
@@ -125,7 +126,7 @@ defmodule SudokuBoard do
 
   ## Parameters
 
-    - board: A Sudokuboard.t representing a board
+    - board: A valid SudokuBoard.t representing a board
 
   ## Examples
 
@@ -139,7 +140,7 @@ defmodule SudokuBoard do
   """
   @spec solved?(SudokuBoard.t()) :: boolean
   def solved?(%SudokuBoard{} = board) do
-    valid?(board) and filled?(board) and partial_solution?(board)
+    filled?(board) and partial_solution?(board)
   end
 
   @doc """
@@ -163,27 +164,27 @@ defmodule SudokuBoard do
     Enum.all?(grid, fn x -> x != 0 end)
   end
 
-  @spec unique_list?(list(integer)) :: boolean
+  @spec unique_list?(list(non_neg_integer())) :: boolean
   defp unique_list?(l) do
     filled_values = Enum.filter(l, fn x -> x > 0 end)
     Enum.count(filled_values) == MapSet.new(filled_values) |> Enum.count()
   end
 
-  @spec square?(integer) :: boolean
+  @spec square?(non_neg_integer()) :: boolean
   defp square?(i) do
     j = integer_sqrt(i)
     j * j == i
   end
 
-  @spec integer_sqrt(integer) :: integer
+  @spec integer_sqrt(non_neg_integer()) :: integer
   defp integer_sqrt(i), do: trunc(:math.sqrt(i))
 
-  @spec get_rows(SudokuBoard.t()) :: list(list(integer))
+  @spec get_rows(SudokuBoard.t()) :: list(list(non_neg_integer()))
   defp get_rows(%SudokuBoard{size: size, grid: grid}) do
     Enum.chunk_every(grid, size)
   end
 
-  @spec get_columns(SudokuBoard.t()) :: list(list(integer))
+  @spec get_columns(SudokuBoard.t()) :: list(list(non_neg_integer()))
   defp get_columns(%SudokuBoard{size: size, grid: grid}) do
     grid
     |> Enum.with_index()
@@ -194,7 +195,7 @@ defmodule SudokuBoard do
     |> Enum.chunk_every(size)
   end
 
-  @spec get_boxes(SudokuBoard.t()) :: list(list(integer))
+  @spec get_boxes(SudokuBoard.t()) :: list(list(non_neg_integer()))
   defp get_boxes(%SudokuBoard{size: size, grid: grid}) do
     grid
     |> Enum.with_index()
