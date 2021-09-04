@@ -5,6 +5,7 @@ defmodule SudokuBoardCandidates do
   @enforce_keys [:size, :grid]
   defstruct [:size, :grid]
 
+  @type index :: non_neg_integer()
   @type position :: {non_neg_integer(), non_neg_integer()}
   @type candidate :: non_neg_integer()
   @type candidates :: MapSet.t(non_neg_integer())
@@ -18,6 +19,23 @@ defmodule SudokuBoardCandidates do
   def equals?(board1, board2) do
     board1.size == board2.size and board1.grid == board2.grid
   end
+
+  @spec index_to_position(t(), non_neg_integer()) :: position()
+  def index_to_position(%SudokuBoardCandidates{size: size}, idx) do
+    index_to_position_internal(idx, size)
+  end
+
+  @spec get_candidates(t(), non_neg_integer()) :: candidates()
+  def get_candidates(%SudokuBoardCandidates{} = board, index) when is_integer(index) do
+    get_candidates(board, index_to_position(board, index))
+  end
+
+  @spec get_candidates(t(), position()) :: candidates()
+  def get_candidates(%SudokuBoardCandidates{} = board, position) when tuple_size(position) == 2 do
+    Map.get(board.grid, position)
+  end
+
+  defp index_to_position_internal(index, size), do: {rem(index, size), div(index, size)}
 
   @doc """
   Creates a sudokuboard from a list. No validation checking is done.
@@ -35,7 +53,7 @@ defmodule SudokuBoardCandidates do
 
     transformed_grid =
       for {value, index} <- Enum.with_index(grid), into: %{} do
-        position = {rem(index, size), div(index, size)}
+        position = index_to_position_internal(index, size)
         candidates = if value != 0, do: MapSet.new([value]), else: MapSet.new(1..size)
         {position, candidates}
       end
@@ -85,10 +103,17 @@ defmodule SudokuBoardCandidates do
   def eliminate_candidates(%SudokuBoardCandidates{} = board) do
     filled_cells = Enum.filter(board.grid, fn {_, candidates} -> MapSet.size(candidates) == 1 end)
 
-    Enum.reduce(filled_cells, board, fn {_position, value} = cell, acc ->
-      get_affected_cells(acc, cell)
-      |> eliminate_candidates_helper(value, acc)
-    end)
+    new_board =
+      Enum.reduce(filled_cells, board, fn {_position, value} = cell, acc ->
+        get_affected_cells(acc, cell)
+        |> eliminate_candidates_helper(value, acc)
+      end)
+
+    if equals?(board, new_board) do
+      new_board
+    else
+      eliminate_candidates(new_board)
+    end
   end
 
   defp eliminate_candidates_helper([], _value, acc), do: acc
@@ -262,13 +287,14 @@ defimpl String.Chars, for: SudokuBoardCandidates do
       |> Enum.reduce("", fn {row, idx}, acc ->
         extra_rows =
           if rem(idx, chunk_size) == 0 do
-            "\n"
+            String.pad_trailing("\n\t    ", size * (size + 2) + 1, "*")
           else
             ""
           end
 
         "#{acc}#{extra_rows}\n\t    #{format_row(row, chunk_size)}"
       end)
+      |> then(fn x -> x <> String.pad_trailing("\n\t    ", size * (size + 2) + 1, "*") end)
       |> String.trim()
 
     ~s/%SudokuBoardCandidates{
@@ -280,7 +306,8 @@ defimpl String.Chars, for: SudokuBoardCandidates do
   defp format_row(row, chunk_size) do
     row
     |> Enum.chunk_every(chunk_size)
-    |> Enum.reduce("", fn x, acc -> "#{acc}  #{x}" end)
+    |> Enum.reduce("", fn x, acc -> "#{acc}*#{x}" end)
+    |> then(fn x -> x <> "*" end)
     |> String.trim()
   end
 end
