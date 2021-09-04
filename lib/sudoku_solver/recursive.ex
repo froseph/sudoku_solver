@@ -50,6 +50,13 @@ defmodule SudokuSolver.Recursive do
     end
   end
 
+  @doc """
+  Finds all possible solutions to a sudoku.
+
+  ## Parameters
+
+    - board: A sudoku board
+  """
   @impl SudokuSolver
   @spec all_solutions(SudokuBoard.t()) :: [SudokuBoard.t()]
   def all_solutions(%SudokuBoard{} = board) do

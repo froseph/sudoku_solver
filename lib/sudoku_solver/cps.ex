@@ -19,11 +19,11 @@ defmodule SudokuSolver.CPS do
   # to the front. Solve helper keps track of which cell we are currently trying.
   # It calls the failure continuation `fc` when needs to backtrack.
   @spec solve_helper(SudokuBoard.t(), integer(), fun()) :: SudokuBoard.t() | any()
-  def solve_helper(%SudokuBoard{} = board, -1, fc) do
+  defp solve_helper(%SudokuBoard{} = board, -1, fc) do
     if SudokuBoard.solved?(board), do: board, else: fc.()
   end
 
-  def solve_helper(%SudokuBoard{size: size, grid: grid} = board, idx, fc) do
+  defp solve_helper(%SudokuBoard{size: size, grid: grid} = board, idx, fc) do
     elt = Enum.at(grid, idx)
 
     if elt != 0 do
@@ -46,6 +46,13 @@ defmodule SudokuSolver.CPS do
     end
   end
 
+  @doc """
+  Finds all possible solutions to a sudoku.
+
+  ## Parameters
+
+    - board: A sudoku board
+  """
   @impl SudokuSolver
   @spec all_solutions(SudokuBoard.t()) :: [SudokuBoard.t()]
   def all_solutions(%SudokuBoard{} = board) do
